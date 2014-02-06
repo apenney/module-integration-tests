@@ -1,5 +1,5 @@
 HOSTS:
-  master.local:
+  master:
     roles:
       - master
       - database
@@ -8,7 +8,7 @@ HOSTS:
     box : centos-64-x64-vbox4210-nocm
     box_url : http://puppet-vagrant-boxes.puppetlabs.com/centos-64-x64-vbox4210-nocm.box
     hypervisor : vagrant
-  agent.local:
+  agent:
     roles:
       - agent
     platform: el-6-x86_64

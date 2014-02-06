@@ -6,12 +6,12 @@ hosts.each do |host|
     on host, 'echo \'export PATH=/var/lib/gems/1.8/bin/:${PATH}\' >> ~/.bashrc'
   end
   if host.is_pe?
+    if host['platform'] =~ /el/
+      on master, shell('iptables -I INPUT 4 -p tcp -m state --state NEW -m tcp --dport 8140 -j ACCEPT'), { :acceptable_exit_codes => [0,1] }
+    end
     install_pe
   else
-    # Install Puppet
-    install_package host, 'rubygems'
-    on host, 'gem install puppet --no-ri --no-rdoc'
-    on host, "mkdir -p #{host['distmoduledir']}"
+    install_puppet
   end
 end
 
@@ -22,17 +22,18 @@ RSpec.configure do |c|
   # Configure all nodes in nodeset
   c.before :suite do
     # Install module and dependencies
-    on master, puppet('module','install','puppetlabs-ntp'),        {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-firewall'),   {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-apt'),        {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-apache'),     {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-mysql'),      {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-postgresql'), {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-registry'),   {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-reboot'),     {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-inifile'),    {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-java_ks'),    {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-concat'),     {  :acceptable_exit_codes => [0,1] }
-    on master, puppet('module','install','puppetlabs-stdlib'),     {  :acceptable_exit_codes => [0,1] }
+    install_options = "--modulepath #{master['distmoduledir']} --ignore-dependencies --force"
+    on master, puppet('module','install','puppetlabs-ntp', install_options),        { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-firewall', install_options),   { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-apt', install_options),        { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-apache', install_options),     { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-mysql', install_options),      { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-postgresql', install_options), { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-registry', install_options),   { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-reboot', install_options),     { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-inifile', install_options),    { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-java_ks', install_options),    { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-concat', install_options),     { :acceptable_exit_codes => [0,1] }
+    on master, puppet('module','install','puppetlabs-stdlib', install_options),     { :acceptable_exit_codes => [0,1] }
   end
 end
